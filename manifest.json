@@ -1,11 +1,12 @@
 {
-  "name": "稼働時間計算 For Freee",
-  "short_name": "稼働時間計算",
-  "description": "Freeeのトップページで勤務時間を取得します。",
+  "name": "日報生成 For Freee",
+  "short_name": "日報生成",
+  "description": "退勤後のFreeeのトップページで、勤務時間から日報の雛形を生成します。",
   "version": "1.0",
   "manifest_version": 3,
   "icons": {
-    "48": "images/icon.png"
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
   },
   "content_scripts": [
     {
