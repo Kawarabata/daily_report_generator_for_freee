@@ -13,6 +13,12 @@
   const thisMonth = today.getMonth();
   const thisDay = today.getDate();
 
+  // 明日の年月日を取得
+  let tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowMonth = tomorrow.getMonth();
+  const tomorrowDay = tomorrow.getDate();
+
   // 「打刻時刻を変更」モーダルを開く関数
   const openModal = () => {
     const swButtons = document.querySelectorAll('.sw-button');
@@ -76,6 +82,11 @@
     return formattedTimeHM(workTimeMinutes);
   };
 
+  // optionsのitems.selectedFormatの内容から、開発部風フォーマットである場合trueを返す関数
+  const isDevFormat = (selectedFormat) => {
+    return selectedFormat === undefined || selectedFormat === 'dev';
+  };
+
   // クリップボードにtextをコピーしてalertで表示する関数
   const copyToClipboard = (text) => {
     const listener = function (e) {
@@ -132,20 +143,34 @@
     const leaveTime = digitalTimeFromDate(leaveDatetime);
     const formattedBreakTime = formattedTimeHM(breakTimeMinutes);
 
-    // 生成するテキストの内容
-    const text = `# 本日の作業内容
+    // optionsで設定した内容をチェックしてフォーマットに反映
+    chrome.storage.sync.get(['selectedFormat'], (items) => {
+      if (isDevFormat(items.selectedFormat)) {
+        const text = `# 本日の作業内容
 稼働時間: ${commutingTime} ~ ${leaveTime}
 - h
-休憩 ${formattedBreakTime}
-実働 ${formattedWorkTime}
+休憩: ${formattedBreakTime}
+実働: ${formattedWorkTime}
 
 # 明日の予定
 - `;
+        // クリップボードにコピーしてalertで表示
+        copyToClipboard(text);
+      } else if (items.selectedFormat === 'biz') {
+        const text = `# ${thisMonth + 1}/${thisDay}の作業内容
+稼働時間 ${commutingTime}~${leaveTime}（実働 ${formattedWorkTime}）
+・
 
-    // クリップボードにコピーしてalertで表示
-    copyToClipboard(text);
+# ${tomorrowMonth + 1}/${tomorrowDay}の作業予定
+・ `;
+        // クリップボードにコピーしてalertで表示
+        copyToClipboard(text);
+      } else {
+        alert('すみません、日報を生成できませんでした...');
+      }
+    });
 
-    // モーダル閉じる
+    // 「打刻時刻を変更」モーダルを閉じる
     closeModal();
   };
 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>設定 | 日報生成 For Freee</title>
+    <link rel="stylesheet" href="options.css" />
+    <script src="options.js" defer></script>
+  </head>
+  <body>
+    <h1>日報形式選択</h1>
+    <form id="format-form">
+      <div class="input-container">
+        <input type="radio" id="dev" name="format" value="dev" checked />
+        <label for="dev">
+          <span class="format-label"> 開発部風フォーマット</span>
+          <div class="example-container">
+            例)<br />
+            <p class="report-example">
+              # 本日の作業内容<br />
+              稼働時間: 10:00 ~ 20:16<br />
+              - h <br />
+              休憩: 1h 28m<br />
+              実働: 8h 48m<br />
+              <br />
+              # 明日の予定<br />
+              - <br />
+            </p>
+          </div>
+        </label>
+      </div>
+      <div class="input-container">
+        <input type="radio" id="biz" name="format" value="biz" />
+        <label for="biz">
+          <span class="format-label">Biz風フォーマット</span>
+          <div class="example-container">
+            例)<br />
+            <p class="report-example">
+              # 6/21の作業内容<br />
+              稼働時間 09:14-21:50（実働 10:21）<br />
+              ・ <br />
+              <br />
+              # 6/22の作業予定<br />
+              ・ <br />
+            </p>
+          </div>
+        </label>
+      </div>
+      <button type="submit">保存する</button>
+    </form>
+  </body>
+</html>

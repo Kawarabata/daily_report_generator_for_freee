@@ -1,0 +1,56 @@
+body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  row-gap: 24px;
+  width: 568px;
+  margin: 0 auto;
+  padding-top: 20px;
+  background: black;
+  color: white;
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+form {
+  width: 360px;
+}
+
+.input-container + .input-container {
+  margin-top: 20px;
+}
+
+.example-container {
+  padding: 8px 20px;
+  margin-top: 8px;
+  background-color: #232528;
+  border-radius: 4px;
+}
+
+.report-example {
+  padding-left: 20px;
+  color: #eee;
+}
+
+button {
+  display: block;
+  margin-top: 12px;
+  margin-left: auto;
+}
+
+.format-label {
+  font-size: 16px;
+}
+
+.routine-input {
+  width: 100%;
+  background-color: #232528;
+  color: white;
+}
+
+.routine-input + .routine-input {
+  margin-top: 4px;
+}

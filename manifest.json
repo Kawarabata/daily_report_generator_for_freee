@@ -13,5 +13,7 @@
       "matches": ["https://p.secure.freee.co.jp/"],
       "js": ["content.js"]
     }
-  ]
+  ],
+  "permissions": ["storage"],
+  "options_page": "options.html"
 }
