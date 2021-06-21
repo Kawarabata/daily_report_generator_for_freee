@@ -44,7 +44,7 @@
           };
         }
       })
-      .filter((e) => e);
+      .filter((type) => type);
   };
 
   // 休憩時間の合計(分)を計算する関数
@@ -82,9 +82,46 @@
     return formattedTimeHM(workTimeMinutes);
   };
 
+  // optionsのitems.routinesの内容から、ルーティン一覧のテキストを返す関数
+  const routinesFrom = (routines) => {
+    if (routines) {
+      return JSON.parse(routines)
+        .map((routine) => `- ${routine}\n`)
+        .join('');
+    } else {
+      return '- ';
+    }
+  };
+
   // optionsのitems.selectedFormatの内容から、開発部風フォーマットである場合trueを返す関数
   const isDevFormat = (selectedFormat) => {
     return selectedFormat === undefined || selectedFormat === 'dev';
+  };
+
+  const textFrom = (selectedFormat, routines, timeParams) => {
+    if (isDevFormat(selectedFormat)) {
+      // 開発部風
+      return (
+        '# 本日の作業内容\n' +
+        `稼働時間: ${timeParams.commute} ~ ${timeParams.leave}\n` +
+        `${routines}\n` +
+        `休憩: ${timeParams.break}\n` +
+        `実働: ${timeParams.work}\n` +
+        '# 明日の予定\n' +
+        `${routines}`
+      );
+    } else if (selectedFormat === 'biz') {
+      // Biz風
+      return (
+        `# ${thisMonth + 1}/${thisDay}の作業内容\n` +
+        `稼働時間 ${timeParams.commute}~${timeParams.leave}（実働 ${timeParams.work})\n` +
+        `${routines}\n` +
+        `# ${tomorrowMonth + 1}/${tomorrowDay}の作業予定\n` +
+        `${routines}`
+      );
+    } else {
+      alert('すみません、日報を生成できませんでした...');
+    }
   };
 
   // クリップボードにtextをコピーしてalertで表示する関数
@@ -142,31 +179,21 @@
     const commutingTime = digitalTimeFromDate(commutingDatetime);
     const leaveTime = digitalTimeFromDate(leaveDatetime);
     const formattedBreakTime = formattedTimeHM(breakTimeMinutes);
+    const timeParams = {
+      commute: commutingTime,
+      leave: leaveTime,
+      break: formattedBreakTime,
+      work: formattedWorkTime,
+    };
 
     // optionsで設定した内容をチェックしてフォーマットに反映
-    chrome.storage.sync.get(['selectedFormat'], (items) => {
-      if (isDevFormat(items.selectedFormat)) {
-        const text = `# 本日の作業内容
-稼働時間: ${commutingTime} ~ ${leaveTime}
-- h
-休憩: ${formattedBreakTime}
-実働: ${formattedWorkTime}
+    chrome.storage.sync.get(['selectedFormat', 'routines'], (items) => {
+      const routines = routinesFrom(items.routines);
+      const text = textFrom(items.selectedFormat, routines, timeParams);
 
-# 明日の予定
-- `;
+      if (text) {
         // クリップボードにコピーしてalertで表示
         copyToClipboard(text);
-      } else if (items.selectedFormat === 'biz') {
-        const text = `# ${thisMonth + 1}/${thisDay}の作業内容
-稼働時間 ${commutingTime}~${leaveTime}（実働 ${formattedWorkTime}）
-・
-
-# ${tomorrowMonth + 1}/${tomorrowDay}の作業予定
-・ `;
-        // クリップボードにコピーしてalertで表示
-        copyToClipboard(text);
-      } else {
-        alert('すみません、日報を生成できませんでした...');
       }
     });
 

@@ -1,7 +1,7 @@
 {
   "name": "日報生成 For Freee",
   "short_name": "日報生成",
-  "description": "退勤後のFreeeのトップページで、勤務時間から日報の雛形を生成します。",
+  "description": "退勤後のFreeeのトップページで、勤務時間から日報の雛形を生成します。オプションから、Biz風/Dev風の形式の切り替えや、毎日のルーティン業務の登録もできます。",
   "version": "1.0",
   "manifest_version": 3,
   "icons": {
