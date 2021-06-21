@@ -86,8 +86,8 @@
   const routinesFrom = (routines) => {
     if (routines) {
       return JSON.parse(routines)
-        .map((routine) => `- ${routine}\n`)
-        .join('');
+        .map((routine) => `- ${routine}`)
+        .join('\n');
     } else {
       return '- ';
     }
@@ -107,6 +107,7 @@
         `${routines}\n` +
         `休憩: ${timeParams.break}\n` +
         `実働: ${timeParams.work}\n` +
+        `\n` +
         '# 明日の予定\n' +
         `${routines}`
       );
@@ -116,6 +117,7 @@
         `# ${thisMonth + 1}/${thisDay}の作業内容\n` +
         `稼働時間 ${timeParams.commute}~${timeParams.leave}（実働 ${timeParams.work})\n` +
         `${routines}\n` +
+        '\n' +
         `# ${tomorrowMonth + 1}/${tomorrowDay}の作業予定\n` +
         `${routines}`
       );
@@ -140,11 +142,11 @@
   const closeModal = () => {
     const buttons = document.querySelectorAll('.btn');
     const lastButtonIndex = buttons.length - 1;
-    const closeModalButton = buttons[lastButtonIndex]; // モーダル内の「キャンセル」ボタン
+    const closeModalButton = buttons[lastButtonIndex]; // モーダル内の「キャンセル」ボタンのはず
     closeModalButton.click();
   };
 
-  // ボタンを押して時のメインの処理
+  // ボタンを押した時のメインの処理
   const showAndCopyDailyReport = () => {
     // 「打刻時刻を変更」モーダルを開く
     openModal();
