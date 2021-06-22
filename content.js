@@ -1,10 +1,16 @@
 (() => {
   // コピーボタン設置
-  const navigation = document.querySelector('.navbar-menu');
+  const navigation = document.querySelector('.main-menu');
   const button = document.createElement('button');
-  button.innerHTML = '勤務時間から日報を生成してコピー';
-  button.style.cssText =
-    "height: 34px; color: yellow; background-color: transparent;order: 'none'; cursor: 'pointer'; outline: 'none'; padding: 0 11px; appearance: 'none'";
+  button.innerHTML = '日報を生成';
+  button.style.cssText = `
+    height: 48px;
+    padding: 0 16px;
+    color: #ffff80;
+    background-color: #4e74ea;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;`;
   navigation.appendChild(button);
 
   // 今日の年月日を取得
@@ -23,7 +29,7 @@
   const openModal = () => {
     const swButtons = document.querySelectorAll('.sw-button');
     const lastSwButtonIndex = swButtons.length - 1;
-    const changeWorkTimeButton = swButtons[lastSwButtonIndex]; // 「打刻時刻を変更」ボタンが.sw-buttonの最後の要素だから成り立つ
+    const changeWorkTimeButton = swButtons[lastSwButtonIndex]; // 「打刻時刻を変更」ボタンはsw-buttonの最後の要素のはず
     changeWorkTimeButton.click();
   };
 
