@@ -7,58 +7,129 @@
     <script src="options.js" defer></script>
   </head>
   <body>
-    <h1>日報形式選択</h1>
-    <form id="format-form">
-      <div class="input-container">
-        <input type="radio" id="dev" name="format" value="dev" checked />
-        <label for="dev">
-          <span class="format-label"> 開発部風フォーマット</span>
-          <div class="example-container">
-            例)<br />
-            <p class="report-example">
-              # 本日の作業内容<br />
-              稼働時間: 10:00 ~ 20:16<br />
-              - <br />
-              休憩: 1h 28m<br />
-              実働: 8h 48m<br />
-              <br />
-              # 明日の予定<br />
-              - <br />
-            </p>
+    <div class="format-form-container">
+      <h1>日報形式選択</h1>
+      <form id="format-form">
+        <div class="radio-buttons-container">
+          <div class="select-container">
+            <input type="radio" id="dev" name="format" value="dev" checked />
+            <label for="dev">
+              <span class="format-label"> 開発部風フォーマット</span>
+              <div class="example-container">
+                例)<br />
+                <p class="report-example">
+                  # 本日の作業内容<br />
+                  稼働時間: 10:00 ~ 20:16<br />
+                  - <br />
+                  休憩: 1h 28m<br />
+                  実働: 8h 48m<br />
+                  <br />
+                  # 明日の予定<br />
+                  - <br />
+                </p>
+              </div>
+            </label>
           </div>
-        </label>
-      </div>
-      <div class="input-container">
-        <input type="radio" id="biz" name="format" value="biz" />
-        <label for="biz">
-          <span class="format-label">Biz風フォーマット</span>
-          <div class="example-container">
-            例)<br />
-            <p class="report-example">
-              # 6/21の作業内容<br />
-              稼働時間 10:00-20:16（実働 8:48）<br />
-              - <br />
-              <br />
-              # 6/22の作業予定<br />
-              - <br />
-            </p>
+          <div class="select-container">
+            <input type="radio" id="biz" name="format" value="biz" />
+            <label for="biz">
+              <span class="format-label">Biz風フォーマット</span>
+              <div class="example-container">
+                例)<br />
+                <p class="report-example">
+                  # 6/21の作業内容<br />
+                  稼働時間 10:00-20:16（実働 8:48）<br />
+                  - <br />
+                  <br />
+                  # 6/22の作業予定<br />
+                  - <br />
+                </p>
+              </div>
+            </label>
           </div>
-        </label>
-      </div>
-      <button type="submit">保存する</button>
-    </form>
-    <h1>ルーティン登録</h1>
-    <form id="routine-form">
-      <input type="text" name="routine1" id="routine1" class="routine-input" />
-      <input type="text" name="routine2" id="routine2" class="routine-input" />
-      <input type="text" name="routine3" id="routine3" class="routine-input" />
-      <input type="text" name="routine4" id="routine4" class="routine-input" />
-      <input type="text" name="routine5" id="routine5" class="routine-input" />
-      <input type="text" name="routine6" id="routine6" class="routine-input" />
-      <input type="text" name="routine7" id="routine7" class="routine-input" />
-      <input type="text" name="routine8" id="routine8" class="routine-input" />
-      <input type="text" name="routine9" id="routine9" class="routine-input" />
-      <button type="submit">保存する</button>
-    </form>
+        </div>
+        <button type="submit">保存する</button>
+      </form>
+    </div>
+    <div class="routines-grid">
+      <form id="everyday-routine-form">
+        <h1>ルーティン(毎日)</h1>
+        <input type="text" class="routine-input everyday" />
+        <input type="text" class="routine-input everyday" />
+        <input type="text" class="routine-input everyday" />
+        <input type="text" class="routine-input everyday" />
+        <input type="text" class="routine-input everyday" />
+        <input type="text" class="routine-input everyday" />
+        <input type="text" class="routine-input everyday" />
+        <input type="text" class="routine-input everyday" />
+        <input type="text" class="routine-input everyday" />
+        <button id="everyday" type="submit">保存する</button>
+      </form>
+      <form id="monday-routine-form">
+        <h1>ルーティン(月曜日)</h1>
+        <input type="text" class="routine-input monday" />
+        <input type="text" class="routine-input monday" />
+        <input type="text" class="routine-input monday" />
+        <input type="text" class="routine-input monday" />
+        <input type="text" class="routine-input monday" />
+        <input type="text" class="routine-input monday" />
+        <input type="text" class="routine-input monday" />
+        <input type="text" class="routine-input monday" />
+        <input type="text" class="routine-input monday" />
+        <button id="monday" type="submit">保存する</button>
+      </form>
+      <form id="tuesday-routine-form">
+        <h1>ルーティン(火曜日)</h1>
+        <input type="text" class="routine-input tuesday" />
+        <input type="text" class="routine-input tuesday" />
+        <input type="text" class="routine-input tuesday" />
+        <input type="text" class="routine-input tuesday" />
+        <input type="text" class="routine-input tuesday" />
+        <input type="text" class="routine-input tuesday" />
+        <input type="text" class="routine-input tuesday" />
+        <input type="text" class="routine-input tuesday" />
+        <input type="text" class="routine-input tuesday" />
+        <button id="tuesday" type="submit">保存する</button>
+      </form>
+      <form id="wednesday-routine-form">
+        <h1>ルーティン(水曜日)</h1>
+        <input type="text" class="routine-input wednesday" />
+        <input type="text" class="routine-input wednesday" />
+        <input type="text" class="routine-input wednesday" />
+        <input type="text" class="routine-input wednesday" />
+        <input type="text" class="routine-input wednesday" />
+        <input type="text" class="routine-input wednesday" />
+        <input type="text" class="routine-input wednesday" />
+        <input type="text" class="routine-input wednesday" />
+        <input type="text" class="routine-input wednesday" />
+        <button id="wednesday" type="submit">保存する</button>
+      </form>
+      <form id="thursday-routine-form">
+        <h1>ルーティン(木曜日)</h1>
+        <input type="text" class="routine-input thursday" />
+        <input type="text" class="routine-input thursday" />
+        <input type="text" class="routine-input thursday" />
+        <input type="text" class="routine-input thursday" />
+        <input type="text" class="routine-input thursday" />
+        <input type="text" class="routine-input thursday" />
+        <input type="text" class="routine-input thursday" />
+        <input type="text" class="routine-input thursday" />
+        <input type="text" class="routine-input thursday" />
+        <button id="thursday" type="submit">保存する</button>
+      </form>
+      <form id="friday-routine-form">
+        <h1>ルーティン(金曜日)</h1>
+        <input type="text" class="routine-input friday" />
+        <input type="text" class="routine-input friday" />
+        <input type="text" class="routine-input friday" />
+        <input type="text" class="routine-input friday" />
+        <input type="text" class="routine-input friday" />
+        <input type="text" class="routine-input friday" />
+        <input type="text" class="routine-input friday" />
+        <input type="text" class="routine-input friday" />
+        <input type="text" class="routine-input friday" />
+        <button id="friday" type="submit">保存する</button>
+      </form>
+    </div>
   </body>
 </html>

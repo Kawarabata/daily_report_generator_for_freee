@@ -13,17 +13,34 @@
     font-weight: bold;`;
   navigation.appendChild(button);
 
-  // 今日の年月日を取得
+  const days = [
+    'sunday',
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+  ];
+
+  // 今日の年月日と曜日を取得
   const today = new Date();
   const thisYear = today.getFullYear();
   const thisMonth = today.getMonth();
-  const thisDay = today.getDate();
+  const thisDate = today.getDate();
+  const thisDay = days[today.getDay()];
 
-  // 明日の年月日を取得
+  // 明日の年月日と曜日を取得
   let tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const isFriday = () => thisDay === 'friday';
+  if (isFriday()) {
+    tomorrow.setDate(tomorrow.getDate() + 3);
+  } else {
+    tomorrow.setDate(tomorrow.getDate() + 1);
+  }
   const tomorrowMonth = tomorrow.getMonth();
-  const tomorrowDay = tomorrow.getDate();
+  const tomorrowDate = tomorrow.getDate();
+  const tomorrowDay = days[tomorrow.getDay()];
 
   // 「打刻時刻を変更」モーダルを開く関数
   const openModal = () => {
@@ -36,7 +53,7 @@
   // hh:mmからDateオブジェクトに変換する関数
   const dateFromTime = (time) => {
     times = time.split(':');
-    return new Date(thisYear, thisMonth, thisDay, times[0], times[1]);
+    return new Date(thisYear, thisMonth, thisDate, times[0], times[1]);
   };
 
   // 休憩開始・休憩終了時刻のオブジェクトの配列を返す関数
@@ -88,12 +105,17 @@
     return formattedTimeHM(workTimeMinutes);
   };
 
-  // optionsのitems.routinesの内容から、ルーティン一覧のテキストを返す関数
-  const routinesFrom = (routines) => {
-    if (routines) {
-      return JSON.parse(routines)
-        .map((routine) => `- ${routine}`)
-        .join('\n');
+  // ルーティン一覧のテキストを返す関数
+  const routinesFrom = (everydayRoutines, dayRoutines) => {
+    if (everydayRoutines || dayRoutines) {
+      let routines = [];
+      if (everydayRoutines) {
+        routines = [...routines, ...JSON.parse(everydayRoutines)];
+      }
+      if (dayRoutines) {
+        routines = [...routines, ...JSON.parse(dayRoutines)];
+      }
+      return routines.map((routine) => `- ${routine}`).join('\n');
     } else {
       return '- ';
     }
@@ -104,28 +126,33 @@
     return selectedFormat === undefined || selectedFormat === 'dev';
   };
 
-  const textFrom = (selectedFormat, routines, timeParams) => {
+  const textFrom = (
+    selectedFormat,
+    todayRoutines,
+    tomorrowRoutines,
+    timeParams
+  ) => {
     if (isDevFormat(selectedFormat)) {
       // 開発部風
       return (
         '# 本日の作業内容\n' +
         `稼働時間: ${timeParams.commute} ~ ${timeParams.leave}\n` +
-        `${routines}\n` +
+        `${todayRoutines}\n` +
         `休憩: ${timeParams.break}\n` +
         `実働: ${timeParams.work}\n` +
         `\n` +
         '# 明日の予定\n' +
-        `${routines}`
+        `${tomorrowRoutines}`
       );
     } else if (selectedFormat === 'biz') {
       // Biz風
       return (
-        `# ${thisMonth + 1}/${thisDay}の作業内容\n` +
+        `# ${thisMonth + 1}/${thisDate}の作業内容\n` +
         `稼働時間 ${timeParams.commute}~${timeParams.leave}（実働 ${timeParams.work})\n` +
-        `${routines}\n` +
+        `${todayRoutines}\n` +
         '\n' +
-        `# ${tomorrowMonth + 1}/${tomorrowDay}の作業予定\n` +
-        `${routines}`
+        `# ${tomorrowMonth + 1}/${tomorrowDate}の作業予定\n` +
+        `${tomorrowRoutines}`
       );
     } else {
       alert('すみません、日報を生成できませんでした...');
@@ -195,15 +222,27 @@
     };
 
     // optionsで設定した内容をチェックしてフォーマットに反映
-    chrome.storage.sync.get(['selectedFormat', 'routines'], (items) => {
-      const routines = routinesFrom(items.routines);
-      const text = textFrom(items.selectedFormat, routines, timeParams);
+    chrome.storage.sync.get(
+      ['selectedFormat', 'everyday', thisDay, tomorrowDay],
+      (items) => {
+        const todayRoutines = routinesFrom(items['everyday'], items[thisDay]);
+        const tomorrowRoutines = routinesFrom(
+          items['everyday'],
+          items[tomorrowDay]
+        );
+        const text = textFrom(
+          items.selectedFormat,
+          todayRoutines,
+          tomorrowRoutines,
+          timeParams
+        );
 
-      if (text) {
-        // クリップボードにコピーしてalertで表示
-        copyToClipboard(text);
+        if (text) {
+          // クリップボードにコピーしてalertで表示
+          copyToClipboard(text);
+        }
       }
-    });
+    );
 
     // 「打刻時刻を変更」モーダルを閉じる
     closeModal();
