@@ -38,6 +38,7 @@
   } else {
     tomorrow.setDate(tomorrow.getDate() + 1);
   }
+  const tomorrowYear = tomorrow.getFullYear();
   const tomorrowMonth = tomorrow.getMonth();
   const tomorrowDate = tomorrow.getDate();
   const tomorrowDay = days[tomorrow.getDay()];
@@ -52,8 +53,18 @@
 
   // hh:mmからDateオブジェクトに変換する関数
   const dateFromTime = (time) => {
-    times = time.split(':');
-    return new Date(thisYear, thisMonth, thisDate, times[0], times[1]);
+    const [hours, minutes] = time.split(':');
+    if (Number(hours) < 6) {
+      return new Date(thisYear, thisMonth, thisDate, hours, minutes);
+    } else {
+      return new Date(
+        tomorrowYear,
+        tomorrowMonth,
+        tomorrowDate,
+        hours,
+        minutes
+      );
+    }
   };
 
   // 休憩開始・休憩終了時刻のオブジェクトの配列を返す関数
