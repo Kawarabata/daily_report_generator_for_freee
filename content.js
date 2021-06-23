@@ -23,29 +23,34 @@
     'saturday',
   ];
 
-  // 今日の年月日と曜日を取得
+  // 今日のDate
   let today = new Date();
   // 昼12時より前なら昨日の日報を書いているものとする
   if (today.getHours() < 12) {
     today.setDate(today.getDate() - 1);
   }
+  // 今日の年月日と曜日を取得
   const thisYear = today.getFullYear();
   const thisMonth = today.getMonth();
   const thisDate = today.getDate();
   const thisDay = days[today.getDay()];
 
-  // 明日の年月日と曜日を取得
+  // 明日のDate
   let tomorrow = new Date();
   // 昼12時より前なら昨日の日報を書いているものとする
   if (tomorrow.getHours() < 12) {
     tomorrow.setDate(tomorrow.getDate() - 1);
   }
+
+  // 今日が金曜日ならtomorrowを月曜日とする
   const isFriday = () => thisDay === 'friday';
   if (isFriday()) {
     tomorrow.setDate(tomorrow.getDate() + 3);
   } else {
     tomorrow.setDate(tomorrow.getDate() + 1);
   }
+
+  // 明日の年月日と曜日を取得
   const tomorrowYear = tomorrow.getFullYear();
   const tomorrowMonth = tomorrow.getMonth();
   const tomorrowDate = tomorrow.getDate();
@@ -62,9 +67,8 @@
   // hh:mmからDateオブジェクトに変換する関数
   const dateFromTime = (time) => {
     const [hours, minutes] = time.split(':');
+    // 0時〜6時の場合は退勤が日を跨いだと見なし、翌日扱いにする
     if (Number(hours) < 6) {
-      return new Date(thisYear, thisMonth, thisDate, hours, minutes);
-    } else {
       return new Date(
         tomorrowYear,
         tomorrowMonth,
@@ -72,6 +76,8 @@
         hours,
         minutes
       );
+    } else {
+      return new Date(thisYear, thisMonth, thisDate, hours, minutes);
     }
   };
 
