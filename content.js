@@ -24,7 +24,11 @@
   ];
 
   // 今日の年月日と曜日を取得
-  const today = new Date();
+  let today = new Date();
+  // 昼12時より前なら昨日の日報を書いているものとする
+  if (today.getHours() < 12) {
+    today.setDate(today.getDate() - 1);
+  }
   const thisYear = today.getFullYear();
   const thisMonth = today.getMonth();
   const thisDate = today.getDate();
@@ -32,6 +36,10 @@
 
   // 明日の年月日と曜日を取得
   let tomorrow = new Date();
+  // 昼12時より前なら昨日の日報を書いているものとする
+  if (tomorrow.getHours() < 12) {
+    tomorrow.setDate(tomorrow.getDate() - 1);
+  }
   const isFriday = () => thisDay === 'friday';
   if (isFriday()) {
     tomorrow.setDate(tomorrow.getDate() + 3);
