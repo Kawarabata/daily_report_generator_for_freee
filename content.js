@@ -1,3 +1,182 @@
+const DAYS = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+];
+
+// 今日のDate
+let today = new Date();
+// 昼12時より前なら昨日の日報を書いているものとする
+if (today.getHours() < 12) {
+  today.setDate(today.getDate() - 1);
+}
+// 今日の年月日と曜日を取得
+const thisYear = today.getFullYear();
+const thisMonth = today.getMonth();
+const thisDate = today.getDate();
+const thisDay = DAYS[today.getDay()];
+
+// 明日のDate
+let tomorrow = new Date();
+// 昼12時より前なら昨日の日報を書いているものとする
+if (tomorrow.getHours() < 12) {
+  tomorrow.setDate(tomorrow.getDate() - 1);
+}
+
+// 今日が金曜日ならtomorrowを月曜日とする
+if (thisDay === 'friday') {
+  tomorrow.setDate(tomorrow.getDate() + 3);
+} else {
+  tomorrow.setDate(tomorrow.getDate() + 1);
+}
+
+// 明日の年月日と曜日を取得
+const tomorrowYear = tomorrow.getFullYear();
+const tomorrowMonth = tomorrow.getMonth();
+const tomorrowDate = tomorrow.getDate();
+const tomorrowDay = DAYS[tomorrow.getDay()];
+
+class WorkTimeScraper {
+  get timeList() {
+    return this.timeElements.map((time) => this.dateFromTime(time.textContent));
+  }
+
+  get stampingTypeList() {
+    return this.stampingTypeElements.map((type) => type.textContent);
+  }
+
+  // 打刻時刻(Date)と打刻内容をモーダル内から取得
+  get timeElements() {
+    return this.tableCellElements.filter((el) => {
+      return (this.tableCellElements.indexOf(el) + 3) % 4 === 0; // tableCellElementsの4n-3(n:自然数) 番目の要素を取得する
+    });
+  }
+
+  get stampingTypeElements() {
+    return this.tableCellElements.filter((el) => {
+      return (this.tableCellElements.indexOf(el) % 4) / 4 === 0; // tableCellElementsの4n-4(n:自然数) 番目の要素を取得する
+    });
+  }
+
+  get tableCellElements() {
+    return Array.from(
+      document.querySelectorAll('.vb-tableListCell__text') // 「打刻時刻の修正」モーダル内のテーブルセルは'.vb-tableListCell__text'クラスのはず
+    );
+  }
+
+  // hh:mmからDateオブジェクトに変換する関数
+  dateFromTime = (time) => {
+    const [hours, minutes] = time.split(':');
+    // 0時〜6時の場合は退勤が日を跨いだと見なし、翌日扱いにする
+    if (Number(hours) < 6) {
+      return new Date(
+        tomorrowYear,
+        tomorrowMonth,
+        tomorrowDate,
+        hours,
+        minutes
+      );
+    } else {
+      return new Date(thisYear, thisMonth, thisDate, hours, minutes);
+    }
+  };
+}
+
+class WorkTimeCalculator {
+  constructor(stampingTypeList, timeList) {
+    this.stampingTypeList = stampingTypeList;
+    this.timeList = timeList;
+  }
+
+  get workTimeMinutes() {
+    const wholeWorkTimeMinutes =
+      (this.leaveDatetime - this.commutingDatetime) / 60000;
+    return wholeWorkTimeMinutes - this.breakTimeMinutes;
+  }
+
+  // 休憩時間の合計(分)を計算
+  get breakTimeMinutes() {
+    let breakTimeMilSeconds = 0;
+    this.breakTimeList.forEach((breakTime) => {
+      const diff = breakTime.end - breakTime.start;
+      breakTimeMilSeconds += diff;
+    });
+    return breakTimeMilSeconds / 60000;
+  }
+
+  // 休憩時間のリストを作成: breakTimeList: { start: Date, end: Date }[]
+  get breakTimeList() {
+    return this.stampingTypeList
+      .map((type, index) => {
+        if (type === '休憩開始') {
+          return {
+            start: this.timeList[index],
+            end: this.timeList[index + 1],
+          };
+        }
+      })
+      .filter((type) => type);
+  }
+
+  get commutingDatetime() {
+    return this.timeList[0];
+  }
+
+  get leaveDatetime() {
+    return this.timeList[this.timeList.length - 1];
+  }
+}
+
+class WorkTimeFormatter {
+  constructor(
+    commutingDatetime,
+    leaveDatetime,
+    breakTimeMinutes,
+    workTimeMinutes
+  ) {
+    console.log(commutingDatetime);
+    this.commutingDatetime = commutingDatetime;
+    this.leaveDatetime = leaveDatetime;
+    this.breakTimeMinutes = breakTimeMinutes;
+    this.workTimeMinutes = workTimeMinutes;
+  }
+
+  // 出勤時刻と退勤時刻をDateからhh:mmに変換
+  get commutingTime() {
+    return this.digitalTimeFromDate(this.commutingDatetime);
+  }
+
+  get leaveTime() {
+    return this.digitalTimeFromDate(this.leaveDatetime);
+  }
+
+  get breakTime() {
+    return this.formattedTimeHM(this.breakTimeMinutes);
+  }
+
+  get workTime() {
+    return this.formattedTimeHM(this.workTimeMinutes);
+  }
+
+  // Dateオブジェクトをhh:mmの時刻の形に変換する関数
+  digitalTimeFromDate(date) {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  // minutesから○h▲mの形に変換する関数
+  formattedTimeHM(totalMinutes) {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  }
+}
+
 (() => {
   // コピーボタン設置
   const navigation = document.querySelector('.main-menu');
@@ -13,49 +192,6 @@
     font-weight: bold;`;
   navigation.appendChild(button);
 
-  const days = [
-    'sunday',
-    'monday',
-    'tuesday',
-    'wednesday',
-    'thursday',
-    'friday',
-    'saturday',
-  ];
-
-  // 今日のDate
-  let today = new Date();
-  // 昼12時より前なら昨日の日報を書いているものとする
-  if (today.getHours() < 12) {
-    today.setDate(today.getDate() - 1);
-  }
-  // 今日の年月日と曜日を取得
-  const thisYear = today.getFullYear();
-  const thisMonth = today.getMonth();
-  const thisDate = today.getDate();
-  const thisDay = days[today.getDay()];
-
-  // 明日のDate
-  let tomorrow = new Date();
-  // 昼12時より前なら昨日の日報を書いているものとする
-  if (tomorrow.getHours() < 12) {
-    tomorrow.setDate(tomorrow.getDate() - 1);
-  }
-
-  // 今日が金曜日ならtomorrowを月曜日とする
-  const isFriday = () => thisDay === 'friday';
-  if (isFriday()) {
-    tomorrow.setDate(tomorrow.getDate() + 3);
-  } else {
-    tomorrow.setDate(tomorrow.getDate() + 1);
-  }
-
-  // 明日の年月日と曜日を取得
-  const tomorrowYear = tomorrow.getFullYear();
-  const tomorrowMonth = tomorrow.getMonth();
-  const tomorrowDate = tomorrow.getDate();
-  const tomorrowDay = days[tomorrow.getDay()];
-
   // 「打刻時刻を変更」モーダルを開く関数
   const openModal = () => {
     const changeWorkTimeButton = Array.prototype.slice
@@ -66,70 +202,14 @@
     changeWorkTimeButton.click();
   };
 
-  // hh:mmからDateオブジェクトに変換する関数
-  const dateFromTime = (time) => {
-    const [hours, minutes] = time.split(':');
-    // 0時〜6時の場合は退勤が日を跨いだと見なし、翌日扱いにする
-    if (Number(hours) < 6) {
-      return new Date(
-        tomorrowYear,
-        tomorrowMonth,
-        tomorrowDate,
-        hours,
-        minutes
-      );
-    } else {
-      return new Date(thisYear, thisMonth, thisDate, hours, minutes);
-    }
-  };
-
-  // 休憩開始・休憩終了時刻のオブジェクトの配列を返す関数
-  const breakTimeListFrom = (stampingTypes, datetimes) => {
-    return stampingTypes
-      .map((type, index) => {
-        if (type === '休憩開始') {
-          return {
-            start: datetimes[index],
-            end: datetimes[index + 1],
-          };
-        }
-      })
-      .filter((type) => type);
-  };
-
-  // 休憩時間の合計(分)を計算する関数
-  const breakTimeMinutesFrom = (breakTimeList) => {
-    let breakTimeMilSeconds = 0;
-    breakTimeList.forEach((breakTime) => {
-      const diff = breakTime.end - breakTime.start;
-      breakTimeMilSeconds += diff;
-    });
-    return breakTimeMilSeconds / 60000;
-  };
-
-  // Dateオブジェクトをhh:mmの時刻の形に変換する関数
-  const digitalTimeFromDate = (date) => {
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes}`;
-  };
-
-  // minutesから○h▲mの形に変換する関数
-  const formattedTimeHM = (totalMinutes) => {
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-  };
-
-  // (退勤時刻 - 出勤時刻) - 休憩時間から実働時間を計算する関数
-  const formattedWorkTimeFrom = (
-    commutingDatetime,
-    leaveDatetime,
-    breakTimeMinutes
-  ) => {
-    const wholeWorkTimeMinutes = (leaveDatetime - commutingDatetime) / 60000;
-    const workTimeMinutes = wholeWorkTimeMinutes - breakTimeMinutes;
-    return formattedTimeHM(workTimeMinutes);
+  // 「打刻時刻を変更」モーダルを閉じる関数
+  const closeModal = () => {
+    const closeModalButton = Array.prototype.slice
+      .call(document.querySelectorAll('button'))
+      .find((el) => {
+        return el.textContent === 'キャンセル';
+      });
+    closeModalButton.click();
   };
 
   // ルーティン一覧のテキストを返す関数
@@ -198,63 +278,27 @@
     alert(`以下をクリップボードにコピーしました。\n${'-'.repeat(40)}\n${text}`);
   };
 
-  // 「打刻時刻を変更」モーダルを閉じる関数
-  const closeModal = () => {
-    const closeModalButton = Array.prototype.slice
-      .call(document.querySelectorAll('button'))
-      .find((el) => {
-        return el.textContent === 'キャンセル';
-      });
-    closeModalButton.click();
-  };
-
-  // ボタンを押した時のメインの処理
   const showAndCopyDailyReport = () => {
-    // 「打刻時刻を変更」モーダルを開く
     openModal();
 
-    const tableCellElements = Array.from(
-      document.querySelectorAll('.vb-tableListCell__text') // 「打刻時刻の修正」モーダル内のテーブルセルは'.vb-tableListCell__text'クラスのはず
+    const workTimeScraper = new WorkTimeScraper();
+    const workTimeCalculator = new WorkTimeCalculator(
+      workTimeScraper.stampingTypeList,
+      workTimeScraper.timeList
     );
 
-    // 打刻時刻(Date)と打刻内容をモーダル内から取得
-    const datetimeElements = tableCellElements.filter((el) => {
-      return (tableCellElements.indexOf(el) + 3) % 4 === 0; // tableCellElementsの4n-3(n:自然数) 番目の要素を取得する
-    });
-    const datetimes = datetimeElements.map((datetime) =>
-      dateFromTime(datetime.textContent)
-    );
-    const stampingTypeElements = tableCellElements.filter((el) => {
-      return (tableCellElements.indexOf(el) % 4) / 4 === 0; // tableCellElementsの4n-4(n:自然数) 番目の要素を取得する
-    });
-    const stampingTypes = stampingTypeElements.map((type) => type.textContent);
-
-    // 休憩時間のリストを作成: breakTimeList: { start: Date, end: Date }[]
-    const breakTimeList = breakTimeListFrom(stampingTypes, datetimes);
-
-    // 休憩時間の合計を計算
-    const breakTimeMinutes = breakTimeMinutesFrom(breakTimeList);
-
-    // 出勤時刻と退勤時刻をDateオブジェクトとして取得
-    const commutingDatetime = datetimes[0];
-    const leaveDatetime = datetimes[datetimes.length - 1];
-
-    // 出勤時刻, 退勤時刻, 休憩時間から実働時間を計算
-    const formattedWorkTime = formattedWorkTimeFrom(
-      commutingDatetime,
-      leaveDatetime,
-      breakTimeMinutes
+    const workTimeFormatter = new WorkTimeFormatter(
+      workTimeCalculator.commutingDatetime,
+      workTimeCalculator.leaveDatetime,
+      workTimeCalculator.breakTimeMinutes,
+      workTimeCalculator.workTimeMinutes
     );
 
-    // 出勤時刻と退勤時刻をDateからhh:mmに変換
-    const commutingTime = digitalTimeFromDate(commutingDatetime);
-    const leaveTime = digitalTimeFromDate(leaveDatetime);
-    const formattedBreakTime = formattedTimeHM(breakTimeMinutes);
     const timeParams = {
-      commute: commutingTime,
-      leave: leaveTime,
-      break: formattedBreakTime,
-      work: formattedWorkTime,
+      commute: workTimeFormatter.commutingTime,
+      leave: workTimeFormatter.leaveTime,
+      break: workTimeFormatter.breakTime,
+      work: workTimeFormatter.workTime,
     };
 
     // optionsで設定した内容をチェックしてフォーマットに反映
