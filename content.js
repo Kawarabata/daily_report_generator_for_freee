@@ -58,9 +58,11 @@
 
   // 「打刻時刻を変更」モーダルを開く関数
   const openModal = () => {
-    const swButtons = document.querySelectorAll('.sw-button');
-    const lastSwButtonIndex = swButtons.length - 1;
-    const changeWorkTimeButton = swButtons[lastSwButtonIndex]; // 「打刻時刻を変更」ボタンはsw-buttonの最後の要素のはず
+    const changeWorkTimeButton = Array.prototype.slice
+      .call(document.querySelectorAll('button'))
+      .find((el) => {
+        return el.textContent === '打刻時刻を修正';
+      });
     changeWorkTimeButton.click();
   };
 
@@ -87,8 +89,8 @@
       .map((type, index) => {
         if (type === '休憩開始') {
           return {
-            start: datetimes[index * 2],
-            end: datetimes[index * 2 + 2],
+            start: datetimes[index],
+            end: datetimes[index + 1],
           };
         }
       })
@@ -198,9 +200,11 @@
 
   // 「打刻時刻を変更」モーダルを閉じる関数
   const closeModal = () => {
-    const buttons = document.querySelectorAll('.btn');
-    const lastButtonIndex = buttons.length - 1;
-    const closeModalButton = buttons[lastButtonIndex]; // モーダル内の「キャンセル」ボタンのはず
+    const closeModalButton = Array.prototype.slice
+      .call(document.querySelectorAll('button'))
+      .find((el) => {
+        return el.textContent === 'キャンセル';
+      });
     closeModalButton.click();
   };
 
@@ -209,13 +213,21 @@
     // 「打刻時刻を変更」モーダルを開く
     openModal();
 
+    const tableCellElements = Array.from(
+      document.querySelectorAll('.vb-tableListCell__text') // 「打刻時刻の修正」モーダル内のテーブルセルは'.vb-tableListCell__text'クラスのはず
+    );
+
     // 打刻時刻(Date)と打刻内容をモーダル内から取得
-    const datetimes = Array.from(document.querySelectorAll('.datetime')).map(
-      (datetime) => dateFromTime(datetime.innerText)
+    const datetimeElements = tableCellElements.filter((el) => {
+      return (tableCellElements.indexOf(el) + 3) % 4 === 0; // tableCellElementsの4n-3(n:自然数) 番目の要素を取得する
+    });
+    const datetimes = datetimeElements.map((datetime) =>
+      dateFromTime(datetime.textContent)
     );
-    const stampingTypes = Array.from(document.querySelectorAll('.type')).map(
-      (type) => type.innerText
-    );
+    const stampingTypeElements = tableCellElements.filter((el) => {
+      return (tableCellElements.indexOf(el) % 4) / 4 === 0; // tableCellElementsの4n-4(n:自然数) 番目の要素を取得する
+    });
+    const stampingTypes = stampingTypeElements.map((type) => type.textContent);
 
     // 休憩時間のリストを作成: breakTimeList: { start: Date, end: Date }[]
     const breakTimeList = breakTimeListFrom(stampingTypes, datetimes);
@@ -225,8 +237,7 @@
 
     // 出勤時刻と退勤時刻をDateオブジェクトとして取得
     const commutingDatetime = datetimes[0];
-    const lastDatetimeIndex = datetimes.length - 2;
-    const leaveDatetime = datetimes[lastDatetimeIndex];
+    const leaveDatetime = datetimes[datetimes.length - 1];
 
     // 出勤時刻, 退勤時刻, 休憩時間から実働時間を計算
     const formattedWorkTime = formattedWorkTimeFrom(
