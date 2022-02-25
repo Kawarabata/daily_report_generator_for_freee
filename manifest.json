@@ -2,7 +2,7 @@
   "name": "日報生成 For Freee",
   "short_name": "日報生成",
   "description": "退勤後のFreeeのトップページで、勤務時間から日報の雛形を生成・クリップボードにコピーするボタンを設置します。",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "manifest_version": 3,
   "icons": {
     "16": "images/icon16.png",
